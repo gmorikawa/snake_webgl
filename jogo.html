@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Prova</title>
+        <meta charset="utf-8">
+        <!-- <script src="js/gameEngine.js"></script> -->
+        <script src="js/corpo.js"></script>
+        <script src="js/ponto.js"></script>
+        <script src="js/cobra.js"></script>
+        <script src="js/colisor.js"></script>
+        <script src="js/animacao.js"></script>
+        <script src="js/cenario.js"></script>
+        <script src="js/teclado.js"></script>
+        <script src="js/spritesheet.js"></script>
+        <!-- <script src="js/cobra.js"></script> -->
+    </head>
+    <body>
+        <canvas id="cenarioJogo" height="500px" width="500px">
+            <!-- canvas content here -->
+        </canvas>
+        
+        <script type="text/javascript">
+            var canvas = document.getElementById("cenarioJogo");
+            var context = canvas.getContext("2d");
+            
+            var imagens, animacao, teclado, colisor, fundoEspaco, fundoEstrelas, fundoNuvens;
+            var totalImagens = 0, imgCarregadas = 0;
+            var cobra, ponto;
+            carregarImagens();
+            
+            function carregarImagens() {
+                imagens = {
+                    espaco: "fundo-espaco.png",
+                    estrelas: "fundo-estrelas.png",
+                    nuvens: "fundo-nuvens.png"
+                };
+                
+                for(var i in imagens) {
+                    var img = new Image();
+                    img.src = "img/"+imagens[i];
+                    img.onload = carregando;
+                    totalImagens++;
+                    imagens[i] = img;
+                }
+                
+                console.log("** IMAGENS CARREGANDO **");
+            }
+            
+            function carregando() {
+                imgCarregadas++;
+                if(imgCarregadas === totalImagens) {
+                    iniciarObjetos();
+                }
+                
+                console.log("** IMAGENS CARREGADAS **");
+            }
+            
+            function iniciarObjetos() {
+                teclado = new Teclado(document);
+                animacao = new Animacao(context);
+                colisor = new Colisor()
+                
+                // configurações da cobrinha
+                cobra = new Cobra(context);
+                cobra.velocY = 10;
+                cobra.x = 50;
+                cobra.y = 50;
+                cobra.cor = "red";
+                cobra.altura = 10;
+                cobra.largura = 10;
+                
+                // configurações do objeto de pontuação
+                ponto = new Ponto(context);
+                ponto.respawn(10, "white");
+                
+                animacao.novoProcessamento(colisor);
+                
+                teclado.disparou(SETA_DIREITA, function() { cobra.moverDireita(); });
+                teclado.disparou(SETA_BAIXO, function() { cobra.moverAbaixo(); });
+                teclado.disparou(SETA_ESQUERDA, function() { cobra.moverEsquerda(); });
+                teclado.disparou(SETA_CIMA, function() { cobra.moverAcima(); });
+                
+                fundoEspaco = new Cenario(context, imagens.espaco);
+                fundoEstrelas = new Cenario(context, imagens.estrelas);
+                fundoNuvens = new Cenario(context, imagens.nuvens);
+                fundoEspaco.velocidade = 1;
+                fundoEstrelas.velocidade = 3;
+                fundoNuvens.velocidade = 5;
+                
+                // registrar sprites
+                animacao.novoSprite(fundoEspaco);
+                animacao.novoSprite(fundoEstrelas);
+                animacao.novoSprite(fundoNuvens);
+                animacao.novoSprite(cobra);
+                animacao.novoSprite(ponto);
+                
+                // registrar objetos que colidem
+                colisor.novoSprite(cobra);
+                colisor.novoSprite(ponto);
+                
+                configuracoesIniciais();
+                console.log("** CONFIGURADO **");
+            }
+            
+            function configuracoesIniciais() {
+                animacao.ligar();
+                console.log("** INICIAR JOGO **");
+            }
+        </script>
+    </body>
+</html>
